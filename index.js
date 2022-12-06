@@ -19,8 +19,8 @@ app.get("/video/:id", async function (req, res) {
     let videoSize;
     try {
         videoSize = await AddId(id);
-    } catch(err){
-        return res.status(400).send("Invalid id");
+    } catch (err) {
+        return res.status(400).send(err.message);
     }
     //const videoSize = size;
     const start = Number(range.replace(/\D/g, ""));
@@ -37,8 +37,12 @@ app.get("/video/:id", async function (req, res) {
     };
     res.writeHead(206, headers);
 
-
-    const buffer = await getBuffer(id, start);
+    let buffer;
+    try {
+        buffer = await getBuffer(id, start);
+    } catch (err) {
+        return res.status(400).send(err.message);
+    }
     const fend = end % fileLimit == 0 ? start % fileLimit + CHUNK_SIZE : end % fileLimit + 1;
     const sliced = buffer.slice(start % fileLimit, fend);
 

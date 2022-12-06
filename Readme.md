@@ -9,3 +9,4 @@ First you'll have to rewrite cacheManager.js to fit your needs. After that you c
 node index.js
 ```
 and put link into your html video tag with id and stream it to client.
+https://app.koyeb.com/deploy?type=git&repository=github.com/Zeptosec/VideoStreamer&branch=master&name=vid-str
