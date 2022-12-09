@@ -1,7 +1,7 @@
 import express from 'express';
 const app = express();
 import stream from 'stream';
-import { AddId, getBuffer } from './cacheManager.js';
+import { AddId, clearBuffer, clearQueue, getBuffer } from './cacheManager.js';
 import * as dotenv from 'dotenv'
 dotenv.config()
 
@@ -24,11 +24,19 @@ app.get("/video/:id", async function (req, res) {
     }
     //const videoSize = size;
     const start = Number(range.replace(/\D/g, ""));
-    const CHUNK_SIZE = Math.min(10 ** 6, fileLimit - start % fileLimit - 1);
+    const CHUNK_SIZE = Math.min(1024 ** 2, fileLimit - start % fileLimit - 1);
 
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
     //console.log(start, end, CHUNK_SIZE, currIndex);
     const contentLength = end - start + 1;
+    let buffer;
+    try {
+        buffer = await getBuffer(id, start);
+    } catch (err) {
+        console.log(err);
+        return res.status(400).send(err.message);
+    }
+
     const headers = {
         "Content-Range": `bytes ${start}-${end}/${videoSize}`,
         "Accept-Ranges": "bytes",
@@ -37,12 +45,6 @@ app.get("/video/:id", async function (req, res) {
     };
     res.writeHead(206, headers);
 
-    let buffer;
-    try {
-        buffer = await getBuffer(id, start);
-    } catch (err) {
-        return res.status(400).send(err.message);
-    }
     const fend = end % fileLimit == 0 ? start % fileLimit + CHUNK_SIZE : end % fileLimit + 1;
     const sliced = buffer.slice(start % fileLimit, fend);
 
@@ -53,4 +55,8 @@ app.get("/video/:id", async function (req, res) {
 
 app.listen(8000, function () {
     console.log("Listening on port 8000!");
+    setInterval(() => {
+        clearBuffer();
+        clearQueue();
+    }, 1000 * 60 * 3);
 });
