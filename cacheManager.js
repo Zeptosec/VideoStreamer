@@ -94,7 +94,7 @@ export function clearQueue(){
 }
 
 export function clearBuffer(){
-    for(let [key, value] of buffs.values()){
+    for(let [key, value] of buffs){
         const diff = new Date().getTime() - new Date(value.time).getTime();
         if(diff > lifeOnQueue){
             buffs.delete(key);
