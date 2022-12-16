@@ -30,13 +30,20 @@ app.get("/video/:id", async function (req, res) {
     //console.log(start, end, CHUNK_SIZE, currIndex);
     const contentLength = end - start + 1;
     let buffer;
+    let canceled = false;
+    req.on('close', () => {
+        canceled = true;
+    })
     try {
+        await new Promise(r => setTimeout(r, 1000));
+        if(canceled)
+            return;
         buffer = await getBuffer(id, start);
     } catch (err) {
-        console.log(err);
+        console.trace(err);
         return res.status(400).send(err.message);
     }
-
+    //console.table(getDiff());
     const headers = {
         "Content-Range": `bytes ${start}-${end}/${videoSize}`,
         "Accept-Ranges": "bytes",
@@ -58,5 +65,5 @@ app.listen(8000, function () {
     setInterval(() => {
         clearBuffer();
         clearQueue();
-    }, 1000 * 60 * 3);
+    }, 1000 * 60 * 2);
 });

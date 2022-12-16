@@ -36,10 +36,8 @@ export async function getBuffer(id, start) {
             const cnk = getFromQueue(id, currIndex);
             if (cnk) {
                 buffer = Buffer.from((await cnk).data);
-                console.log("from queue");
             } else {
                 buffer = Buffer.from((await axios.get(`${linkStart}/${fileLink.chunks[currIndex]}/blob`, { responseType: 'arraybuffer' })).data)
-                console.log("not from queue");
             }
             if (amount > currIndex + 1) {
                 putOnQueue(id, fileLink, currIndex + 1);
@@ -66,11 +64,16 @@ export async function getBuffer(id, start) {
 
 function putOnQueue(id, fileLink, index) {
     const rez = Queue.find(w => w.id == id && w.index == index);
-    if (rez) return;
+    if (rez) {
+        return;
+    }
     const chunk = axios.get(`${linkStart}/${fileLink.chunks[index]}/blob`, { responseType: 'arraybuffer' });
+
     Queue.push({ id, index, chunk, time: new Date() })
+
     const cnt = Queue.filter(w => w.id == id).length;
     if (cnt > maxQueue) {
+        // would be a good idea to abort the download but gives an uncatchable error... no clue how to fix it
         Queue.shift();
     }
 }
