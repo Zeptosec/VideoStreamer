@@ -35,7 +35,7 @@ app.get("/video/:id", async function (req, res) {
         canceled = true;
     })
     try {
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 300));
         if(canceled)
             return;
         buffer = await getBuffer(id, start);
