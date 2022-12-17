@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const fileLimit = 8 * 1024 ** 2;
+const chunkSize = 2 * 1024 ** 2;
 
 app.get("/video/:id", async function (req, res) {
     const range = req.headers.range;
@@ -24,7 +25,7 @@ app.get("/video/:id", async function (req, res) {
     }
     //const videoSize = size;
     const start = Number(range.replace(/\D/g, ""));
-    const CHUNK_SIZE = Math.min(1024 ** 2, fileLimit - start % fileLimit - 1);
+    const CHUNK_SIZE = Math.min(chunkSize, fileLimit - start % fileLimit - 1);
 
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
     //console.log(start, end, CHUNK_SIZE, currIndex);
@@ -35,7 +36,7 @@ app.get("/video/:id", async function (req, res) {
         canceled = true;
     })
     try {
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 70));
         if(canceled)
             return;
         buffer = await getBuffer(id, start);
