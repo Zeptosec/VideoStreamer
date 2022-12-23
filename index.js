@@ -50,6 +50,7 @@ app.get("/video/:id", async function (req, res) {
         "Accept-Ranges": "bytes",
         "Content-Length": contentLength,
         "Content-Type": "video/mp4",
+        "Access-Control-Allow-Origin": "*"
     };
     res.writeHead(206, headers);
 
